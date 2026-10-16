@@ -1,0 +1,14 @@
+{
+  "_readme": [
+    "CAD 图块索引：『图块名』 → 『相对 assets/blocks/ 的文件路径』。",
+    "引擎在 furniture[].block 命中本索引时，会直接把 DXF 图块插入到 FURN 图层；",
+    "未命中且未提供 width/depth 时跳过并给出提示。",
+    "注意：ezdxf 不能读取 DWG，需先用 ODA File Converter 批量转成 DXF 再入库。",
+    "入库后可运行 scripts 下的批量脚本生成如下形式的条目。"
+  ],
+  "_example": {
+    "双人床": "床/BED_1800x2000.dxf",
+    "三人沙发": "综合图库/SOFA_2200x900.dxf",
+    "圆形餐桌": "餐桌/DINING_ROUND_1200.dxf"
+  }
+}
