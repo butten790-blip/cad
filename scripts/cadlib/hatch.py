@@ -81,6 +81,25 @@ PATTERN_DESCRIPTION = {
 }
 
 
+def add_solid_poch(msp, points, layer: str = "WALL-POC", color: int = 7) -> None:
+    """墙体的**剖切填充**（poché）——实心黑。
+
+    这是钢筋混凝土墙、柱被水平剖切后的图例画法：
+    墙的几何来自**轮廓线**（直线 / 多段线命令画的），
+    实心黑只是叠在轮廓里的一个**填充命令**（HATCH），不是墙本身。
+
+    因此本函数只负责"填",
+    轮廓由 `geometry.draw_walls` 经 `outline.build_wall_polylines` 并集后画出，
+    两者**落在不同图层**（轮廓 WALL-STR / 填充 WALL-POC），便于单独开关与打印控制。
+    """
+    if not points or len(points) < 3:
+        return
+    hatch = msp.add_hatch(color=color, dxfattribs={"layer": layer})
+    hatch.set_solid_fill(color=color)
+    hatch.paths.add_polyline_path(
+        [(float(p[0]), float(p[1])) for p in points], is_closed=True)
+
+
 def add_area_hatch(msp, points, material: str, scale: float = 1.0,
                    layer: str = "HATCH") -> None:
     """按闭合多边形填充指定材料。

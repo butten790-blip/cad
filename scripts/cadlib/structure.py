@@ -3,15 +3,19 @@
 平面图应表示被剖切到的墙、柱（GB/T 50104）。墙体已由 `outline` 生成，
 本模块补结构柱：矩形轮廓 + 材料填充。
 
-柱在图上的表达：
-    - 轮廓用粗实线（落在 WALL-STR 图层，与承重墙同层级）；
+柱在图上的表达（与墙同一套做法：轮廓 + 填充分层）：
+    - 轮廓用粗实线（`WALL-STR` 图层，与承重墙同层级）；
     - 钢筋混凝土柱按 GB/T 50001 第9章材料图例填充，或涂黑。小比例图上
-      涂黑最清晰，因此默认用 SOLID 实心填充。
+      涂黑最清晰，因此默认用 SOLID 实心填充；
+    - **填充落在 `WALL-POC` 图层**（与墙的 poché 同层），不与轮廓混画：
+      这样单独关掉填充层仍能看到柱与墙的完整轮廓，打印时也能分别控制。
 """
 
 from __future__ import annotations
 
 import math
+
+from .hatch import add_solid_poch
 
 
 def _unit(v):
@@ -52,11 +56,9 @@ def draw_columns(ctx, columns) -> None:
         msp.add_lwpolyline(pts, close=True,
                            dxfattribs={"layer": "WALL-STR"})
 
-        # 混凝土柱涂黑（GB/T 50104 平面图材料图例的简化画法）
+        # 混凝土柱涂黑（GB/T 50104 平面图材料图例的简化画法），填充单独图层
         if col.get("filled", True):
-            hatch = msp.add_hatch(color=7, dxfattribs={"layer": "WALL-STR"})
-            hatch.dxf.solid_fill = 1
-            hatch.paths.add_polyline_path(pts, is_closed=True)
+            add_solid_poch(msp, pts)
 
         if col.get("label"):
             from . import standards as S

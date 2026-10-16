@@ -211,6 +211,24 @@
       }
     },
 
+    "stairs": {
+      "type": "array",
+      "description": "楼梯平面表达（GB/T 50104 图样画法）：踏步分格 + 上下行方向线与箭头，落在 STAIR 图层。",
+      "items": {
+        "type": "object",
+        "required": ["at"],
+        "additionalProperties": false,
+        "properties": {
+          "at": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2, "description": "梯段外包中心 [x, y]，mm" },
+          "width": { "type": "number", "exclusiveMinimum": 0, "default": 1200, "description": "梯段宽度（X 向），mm" },
+          "depth": { "type": "number", "exclusiveMinimum": 0, "default": 2400, "description": "梯段长度（行进方向），mm" },
+          "steps": { "type": "integer", "minimum": 2, "default": 9, "description": "踏步数" },
+          "direction": { "type": "string", "enum": ["up", "down"], "default": "up", "description": "上行 / 下行，决定方向箭头与「上」「下」注字" },
+          "rotation": { "type": "number", "default": 0, "description": "绕外包中心转角（度），逆时针为正" }
+        }
+      }
+    },
+
     "sections": {
       "type": "array",
       "description": "剖切符号（GB/T 50001 第7.1节）。一个完整剖面需两个符号（剖切线两端各一，编号相同）。",
@@ -226,6 +244,50 @@
       }
     },
 
+    "index_symbols": {
+      "type": "array",
+      "description": "索引符号（GB/T 50001 第7.2.1节）：细实线圆直径 8~10mm + 水平直径线，线宽 0.25b。上半圆注详图编号；下半圆注详图所在图纸编号，同张图纸时改画一段水平细实线。",
+      "items": {
+        "type": "object",
+        "required": ["at", "number"],
+        "additionalProperties": false,
+        "properties": {
+          "at": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2, "description": "圆心 [x, y]，mm" },
+          "number": { "type": ["string", "integer"], "description": "详图编号（阿拉伯数字），注在上半圆" },
+          "sheet": { "type": ["string", "null"], "description": "详图所在图纸编号，注在下半圆；省略或 null 表示与本图同张（下半圆画短水平细实线）" }
+        }
+      }
+    },
+
+    "detail_symbols": {
+      "type": "array",
+      "description": "详图符号（GB/T 50001 第7.2.4节）：粗实线圆直径 14mm，线宽 b。跨图纸时圆内以细实线画水平直径，上半圆注详图编号、下半圆注被索引图纸编号。",
+      "items": {
+        "type": "object",
+        "required": ["at", "number"],
+        "additionalProperties": false,
+        "properties": {
+          "at": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2, "description": "圆心 [x, y]，mm" },
+          "number": { "type": ["string", "integer"], "description": "详图编号" },
+          "source_sheet": { "type": ["string", "null"], "description": "被索引图纸的编号；省略或 null 表示与本图同张（编号居中）" }
+        }
+      }
+    },
+
+    "part_marks": {
+      "type": "array",
+      "description": "零件/钢筋/杆件/设备（消火栓、配电箱、管井）编号（GB/T 50001 第7.2.3节）：细实线圆直径 4~6mm，线宽 0.25b。",
+      "items": {
+        "type": "object",
+        "required": ["at", "number"],
+        "additionalProperties": false,
+        "properties": {
+          "at": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2, "description": "圆心 [x, y]，mm" },
+          "number": { "type": ["string", "integer"], "description": "顺序编号" }
+        }
+      }
+    },
+
     "window_door_schedule": {
       "type": "boolean",
       "default": true,
@@ -234,7 +296,7 @@
 
     "furniture": {
       "type": "array",
-      "description": "家具/洁具/陈设图块，插入到 FURN 图层(0.18b)。优先从 assets/blocks 图库取块。",
+      "description": "家具/洁具/陈设图块，插入到 FURN 图层(0.25b)。优先从 assets/blocks 图库取块。",
       "items": {
         "type": "object",
         "required": ["block", "at"],

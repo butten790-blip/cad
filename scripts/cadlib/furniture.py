@@ -121,6 +121,92 @@ def _b_fridge(msp, cx, cy, w, d, c, s):
     _line(msp, cx, cy, c, s, -w / 2 + 2, 0, w / 2 - 2, 0)
 
 
+def _b_wardrobe(msp, cx, cy, w, d, c, s):
+    """衣柜：外框 + 挂衣杆 + 若干衣架圆圈。"""
+    _rect(msp, cx, cy, w, d, c, s)
+    _line(msp, cx, cy, c, s, 0, -d / 2 + 80, 0, d / 2 - 80)
+    r = min(w, d) * 0.055
+    n = max(2, int(d / 320))
+    for k in range(n):
+        yy = -d / 2 + d * (k + 0.5) / n
+        _ellipse(msp, cx, cy + yy, r, r, c, s)
+
+
+def _b_shoe_cabinet(msp, cx, cy, w, d, c, s):
+    """鞋柜：细长柜体，沿长边等分。"""
+    _rect(msp, cx, cy, w, d, c, s)
+    n = max(2, int(max(w, d) / 350))
+    for k in range(1, n):
+        if d >= w:
+            _line(msp, cx, cy, c, s, -w / 2, -d / 2 + d * k / n, w / 2, -d / 2 + d * k / n)
+        else:
+            _line(msp, cx, cy, c, s, -w / 2 + w * k / n, -d / 2, -w / 2 + w * k / n, d / 2)
+
+
+def _b_round_table(msp, cx, cy, w, d, c, s):
+    """圆餐桌：圆桌面 + 沿圆周均布椅子（默认 10 把）。"""
+    r = min(w, d) / 2.0
+    ring = []
+    for i in range(32):
+        a = math.tau * i / 32.0
+        ring.append((cx + r * math.cos(a) * c - r * math.sin(a) * s,
+                     cy + r * math.cos(a) * s + r * math.sin(a) * c))
+    msp.add_lwpolyline(ring, close=True, dxfattribs={"layer": "FURN"})
+    n = 10
+    ch = r * 0.30
+    for i in range(n):
+        a = math.tau * i / n
+        dx, dy = (r + ch * 0.62) * math.cos(a), (r + ch * 0.62) * math.sin(a)
+        _rect(msp, cx + dx * c - dy * s, cy + dx * s + dy * c, ch, ch, c, s)
+
+
+def _b_tea_table(msp, cx, cy, w, d, c, s):
+    """茶桌：长桌 + 两侧长凳。"""
+    _rect(msp, cx, cy, w, d, c, s)
+    bench_w = min(w * 0.8, 1400)
+    for dy in (d / 2 + 120, -d / 2 - 120):
+        _rect(msp, cx + dy * 0, cy + dy, bench_w, 260, c, s)
+
+
+def _b_mahjong(msp, cx, cy, w, d, c, s):
+    """麻将桌：方桌 + 四角座椅。"""
+    _rect(msp, cx, cy, w, d, c, s)
+    _rect(msp, cx, cy, w * 0.62, d * 0.62, c, s)
+    ch = min(w, d) * 0.30
+    for dx, dy in ((-w / 2 - ch * 0.62, -d / 2 - ch * 0.62), (w / 2 + ch * 0.62, -d / 2 - ch * 0.62),
+                   (w / 2 + ch * 0.62, d / 2 + ch * 0.62), (-w / 2 - ch * 0.62, d / 2 + ch * 0.62)):
+        _rect(msp, cx + dx, cy + dy, ch, ch, c, s)
+
+
+def _b_coffee_table(msp, cx, cy, w, d, c, s):
+    _rect(msp, cx, cy, w, d, c, s)
+    _rect(msp, cx, cy, w * 0.78, d * 0.70, c, s)
+
+
+def _b_tv_cabinet(msp, cx, cy, w, d, c, s):
+    _rect(msp, cx, cy, w, d, c, s)
+    _rect(msp, cx, cy, w * 0.42, d * 0.36, c, s)
+
+
+def _b_shrine(msp, cx, cy, w, d, c, s):
+    """神龛/供桌：供桌 + 香炉 + 两侧供品。"""
+    _rect(msp, cx, cy, w, d, c, s)
+    _rect(msp, cx, cy + d * 0.22, w * 0.34, d * 0.32, c, s)
+    for dx in (-w * 0.32, w * 0.32):
+        _ellipse(msp, cx + dx, cy + d * 0.10, w * 0.05, d * 0.14, c, s)
+
+
+def _b_shower(msp, cx, cy, w, d, c, s):
+    """淋浴房：底盘 + 排水地漏。"""
+    _rect(msp, cx, cy, w, d, c, s)
+    _rect(msp, cx, cy, w * 0.86, d * 0.80, c, s)
+    _ellipse(msp, cx - w * 0.28, cy, min(w, d) * 0.07, min(w, d) * 0.07, c, s)
+
+
+def _b_chair(msp, cx, cy, w, d, c, s):
+    _rect(msp, cx, cy, w, d, c, s)
+
+
 BUILTIN_FURNITURE = {
     "双人床": _b_double_bed,
     "单人床": _b_single_bed,
@@ -136,6 +222,16 @@ BUILTIN_FURNITURE = {
     "浴缸": _b_bathtub,
     "灶台": _b_stove,
     "冰箱": _b_fridge,
+    "衣柜": _b_wardrobe,
+    "鞋柜": _b_shoe_cabinet,
+    "圆餐桌": _b_round_table,
+    "茶桌": _b_tea_table,
+    "麻将桌": _b_mahjong,
+    "茶几": _b_coffee_table,
+    "电视柜": _b_tv_cabinet,
+    "神龛": _b_shrine,
+    "淋浴房": _b_shower,
+    "椅子": _b_chair,
 }
 
 

@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import math
 
+from .hatch import add_solid_poch
 from .outline import build_wall_polylines
 
 
@@ -130,7 +131,13 @@ def _pt(entry, s, off):
 
 # ---------------------------------------------------------------- 绘制
 def draw_walls(ctx, plan) -> None:
-    """绘制墙体轮廓（连续多段线）与门窗图例。"""
+    """绘制墙体轮廓（连续多段线）、**结构墙剖切填充**与门窗图例。
+
+    墙体走的是「轮廓 + 填充」两步，与手工 CAD 画法一致：
+        1. 轮廓 —— 直线/多段线命令画的边界，由 outline 的并集边界给出（WALL-STR / WALL-PAR）
+        2. 填充 —— 填充命令（HATCH）叠在结构墙轮廓内，**单独落在 WALL-POC 图层**
+    因此改填充样式不影响轮廓，关掉填充层也不影响墙的几何。
+    """
     msp = ctx.msp
 
     # 1) 墙体轮廓：一笔成型的连续多段线，含洞口封口线
@@ -140,6 +147,21 @@ def draw_walls(ctx, plan) -> None:
             close=bool(closed),
             dxfattribs={"layer": layer},
         )
+
+    # 1b) 结构墙剖切填充（poché）：只填**实墙段**，洞口处留空
+    for entry in plan:
+        if entry["layer"] != "WALL-STR":
+            continue
+        t = entry["thickness"]
+        for a, b in entry["solids"]:
+            if b - a <= 1e-6:
+                continue
+            add_solid_poch(msp, [
+                _pt(entry, a, t / 2.0),
+                _pt(entry, b, t / 2.0),
+                _pt(entry, b, -t / 2.0),
+                _pt(entry, a, -t / 2.0),
+            ])
 
     # 2) 门窗图例：不参与墙体布尔运算，单独补画
     for entry in plan:

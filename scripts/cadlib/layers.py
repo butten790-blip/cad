@@ -10,20 +10,23 @@ import ezdxf
 from . import standards as S
 
 # (图层名, 线宽系数(相对 b), ACI 颜色, 线型, 用途)
+# 线宽系数严格按 GB/T 50104-2010 表 2.1.2，只允许 b / 0.7b / 0.5b / 0.25b 四档。
 LAYER_TABLE = (
-    ("WALL-STR", 0.50, 7, "CONTINUOUS", "结构墙/承重墙剖切到"),
-    ("WALL-PAR", 0.25, 7, "CONTINUOUS", "隔墙/非承重墙"),
-    ("WIN-DOOR", 0.7,  2, "CONTINUOUS", "门窗洞口和图例"),
-    ("FURN",     0.18, 8, "CONTINUOUS", "家具/洁具/陈设"),
-    ("DIM",      0.13, 1, "CONTINUOUS", "尺寸标注"),
-    ("TEXT",     0.13, 5, "CONTINUOUS", "文字说明"),
+    ("WALL-STR", 1.0,  7, "CONTINUOUS", "结构墙/承重墙：平剖面中被剖切的主要建筑构造轮廓线"),
+    ("WALL-POC", 0.25, 7, "CONTINUOUS", "结构墙剖切填充（poché）：实心黑，独立图层，不与轮廓线混画"),
+    ("WALL-PAR", 0.7,  7, "CONTINUOUS", "隔墙/非承重墙：被剖切的次要建筑构造轮廓线"),
+    ("STAIR",    0.7,  7, "CONTINUOUS", "楼梯踏步与上下行方向线（被剖切的次要构件）"),
+    ("WIN-DOOR", 0.7,  2, "CONTINUOUS", "门窗洞口和图例（被剖切的次要构配件）"),
+    ("FURN",     0.25, 8, "CONTINUOUS", "家具/洁具/陈设（图例线、家具线）"),
+    ("DIM",      0.5,  1, "CONTINUOUS", "尺寸标注（尺寸线、尺寸界限）"),
+    ("TEXT",     0.25, 5, "CONTINUOUS", "文字说明"),
     # AXIS 原表为「红」，按审图意见改为与图线同色（7=白/黑）。
     # 依据：轴线是辅助线、轴号是标注元素，出图时都应是细黑线；
     # 轴号圆圈更要求细实线（GB/T 50001 第8章），红线圆不符合。
-    ("AXIS",     0.13, 7, "CENTER",     "定位轴线（细点画线）与轴号（细实线圆圈）"),
-    ("HATCH",    0.13, 8, "CONTINUOUS", "材料填充"),
-    ("ELEC",     0.13, 2, "DASHED",     "电气线路（虚线）"),
-    ("WATER",    0.13, 3, "CONTINUOUS", "给排水（双线）"),
+    ("AXIS",     0.25, 7, "CENTER",     "定位轴线（细点画线）与轴号（细实线圆圈）"),
+    ("HATCH",    0.25, 8, "CONTINUOUS", "图例填充线、纹样线"),
+    ("ELEC",     0.25, 2, "DASHED",     "电气线路（虚线）"),
+    ("WATER",    0.25, 3, "CONTINUOUS", "给排水（双线）"),
 )
 
 LAYER_NAMES = tuple(r[0] for r in LAYER_TABLE)
@@ -50,7 +53,7 @@ def create_layers(ctx) -> None:
     for name in (LAYER_FRAME, LAYER_SYMBOL, LAYER_SITE):
         if name not in doc.layers:
             doc.layers.add(name, color=7, linetype="CONTINUOUS",
-                           lineweight=ctx.lw(0.13))
+                           lineweight=ctx.lw(0.25))
 
     for name, lw_factor, aci, linetype, purpose in LAYER_TABLE:
         if name in doc.layers:

@@ -26,7 +26,10 @@ from cadlib.rooms import draw_rooms
 from cadlib.schedule import (collect_openings, draw_opening_labels,
                              draw_schedule, schedule_size)
 from cadlib.structure import draw_columns
+from cadlib.stair import draw_stairs
 from cadlib.site import draw_apron, draw_steps
+from cadlib.symbols import (draw_detail_symbols, draw_index_symbols,
+                            draw_part_marks)
 from cadlib.textstyle import create_text_styles
 from cadlib.titleblock import (draw_drawing_name, draw_frame, draw_north_arrow,
                                frame_rect, text_width_mm)
@@ -326,7 +329,14 @@ def render_spec(spec: dict, dxf_version: str = "R2018"):
                    for f in (spec.get("furniture") or [])]
     texts_s = [dict(t, at=_sh(t["at"], d)) for t in (spec.get("texts") or [])]
     columns_s = [dict(c, at=_sh(c["at"], d)) for c in (spec.get("columns") or [])]
+    stairs_s = [dict(c, at=_sh(c["at"], d)) for c in (spec.get("stairs") or [])]
     sections_s = [dict(c, at=_sh(c["at"], d)) for c in (spec.get("sections") or [])]
+    index_s = [dict(c, at=_sh(c["at"], d))
+               for c in (spec.get("index_symbols") or [])]
+    detail_s = [dict(c, at=_sh(c["at"], d))
+                for c in (spec.get("detail_symbols") or [])]
+    part_s = [dict(c, at=_sh(c["at"], d))
+              for c in (spec.get("part_marks") or [])]
     site_s = spec.get("site") or {}
     steps_s = [dict(c, at=_sh(c["at"], d)) for c in (site_s.get("steps") or [])]
 
@@ -343,6 +353,7 @@ def render_spec(spec: dict, dxf_version: str = "R2018"):
     draw_walls(ctx, plan)
     draw_opening_labels(ctx, plan)
     draw_columns(ctx, columns_s)
+    draw_stairs(ctx, stairs_s)
     draw_apron(ctx, site_s.get("apron"), bbox)
     draw_steps(ctx, steps_s)
     # 地面材质填充只属于「地面铺装图」；平面布置图/天花图按惯例不填充，
@@ -351,6 +362,9 @@ def render_spec(spec: dict, dxf_version: str = "R2018"):
     draw_dimensions(ctx, spec_s, plan, bbox)
     draw_section_marks(ctx, sections_s)
     draw_elevations(ctx, elevations_s, bbox)
+    draw_index_symbols(ctx, index_s)
+    draw_detail_symbols(ctx, detail_s)
+    draw_part_marks(ctx, part_s)
     draw_furniture(ctx, furniture_s)
 
     for t in texts_s:
