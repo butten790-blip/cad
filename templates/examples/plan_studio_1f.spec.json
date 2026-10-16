@@ -1,0 +1,81 @@
+{
+  "meta": {
+    "project": "示例工程 · 单身公寓",
+    "drawing_name": "一层平面布置图",
+    "drawing_no": "IN-01",
+    "scale": "1:50",
+    "designer": "AI 出图",
+    "checker": "待审",
+    "date": "2026-10-15",
+    "revision": "A",
+    "notes": [
+      "1. 本图尺寸除标高以米计外，其余均以毫米计。",
+      "2. 未注明墙体均为 240mm 承重墙、120mm 隔墙。",
+      "3. 门窗洞口尺寸见门窗表，安装前需现场复核。"
+    ]
+  },
+
+  "drawing_kind": "floor_finish",
+
+  "sheet": {
+    "size": "A3",
+    "orientation": "landscape",
+    "lineweight_b": 0.5
+  },
+
+  "grid": {
+    "x": [0, 3900, 6900],
+    "y": [0, 4200, 7200]
+  },
+
+  "walls": [
+    { "id": "WL", "start": [0, 0],    "end": [0, 7200],    "thickness": 240, "type": "structural" },
+    { "id": "WR", "start": [6900, 0], "end": [6900, 7200], "thickness": 240, "type": "structural" },
+    { "id": "WB", "start": [0, 0],    "end": [6900, 0],    "thickness": 240, "type": "structural" },
+    { "id": "WT", "start": [0, 7200], "end": [6900, 7200], "thickness": 240, "type": "structural" },
+    { "id": "WP", "start": [3900, 0], "end": [3900, 7200], "thickness": 120, "type": "partition" }
+  ],
+
+  "openings": [
+    { "wall": "WL", "offset": 3900, "width": 1500, "kind": "window", "label": "C1515" },
+    { "wall": "WR", "offset": 2400, "width": 1200, "kind": "window", "label": "C1212" },
+    { "wall": "WB", "offset": 5400, "width": 900,  "kind": "door", "swing": "left",  "label": "M0921" },
+    { "wall": "WP", "offset": 3600, "width": 900,  "kind": "door", "swing": "right", "label": "M0921" }
+  ],
+
+  "rooms": [
+    {
+      "name": "主卧室",
+      "boundary": [[120, 120], [3840, 120], [3840, 7080], [120, 7080]],
+      "floor": "wood_floor",
+      "show_area": true
+    },
+    {
+      "name": "客厅",
+      "boundary": [[3960, 120], [6780, 120], [6780, 7080], [3960, 7080]],
+      "floor": "stone_tile",
+      "show_area": true
+    }
+  ],
+
+  "dimensions": {
+    "auto": true,
+    "side": "bottom_left"
+  },
+
+  "elevations": [
+    { "at": [900, 900],   "value": 0.0 },
+    { "at": [4500, 900],  "value": -0.02 }
+  ],
+
+  "furniture": [
+    { "block": "双人床",   "at": [1900, 5300], "width": 1800, "depth": 2000 },
+    { "block": "沙发",     "at": [5400, 1500], "width": 2200, "depth": 900  },
+    { "block": "茶几",     "at": [5400, 2900], "width": 1200, "depth": 600  },
+    { "block": "餐桌",     "at": [5400, 5600], "width": 1600, "depth": 900  }
+  ],
+
+  "texts": [],
+
+  "titleblock": { "enabled": true }
+}
