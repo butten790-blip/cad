@@ -1,0 +1,104 @@
+{
+  "meta": {
+    "project": "核验案例 · 两室一厅住宅",
+    "drawing_name": "一层平面布置图",
+    "drawing_no": "A-01",
+    "scale": "1:100",
+    "designer": "AI 出图",
+    "checker": "待审",
+    "design_stage": "施工图",
+    "date": "2026-10-16",
+    "revision": "A",
+    "notes": [
+      "1. 本图尺寸除标高以米计外，其余均以毫米计。",
+      "2. 未注明墙体均为 240mm 承重墙、120mm 隔墙。",
+      "3. 客厅与餐厅之间为无门洞口，仅作空间分隔。"
+    ]
+  },
+
+  "drawing_kind": "plan",
+
+  "sheet": {
+    "size": "A3",
+    "orientation": "landscape",
+    "lineweight_b": 0.5
+  },
+
+  "grid": {
+    "x": [0, 3300, 7500, 11100],
+    "y": [0, 4500, 8400]
+  },
+
+  "walls": [
+    { "id": "WL",  "start": [0, 0],       "end": [0, 8400],      "thickness": 240, "type": "structural" },
+    { "id": "WR",  "start": [11100, 0],   "end": [11100, 8400],  "thickness": 240, "type": "structural" },
+    { "id": "WB",  "start": [0, 0],       "end": [11100, 0],     "thickness": 240, "type": "structural" },
+    { "id": "WT",  "start": [0, 8400],    "end": [11100, 8400],  "thickness": 240, "type": "structural" },
+    { "id": "P1",  "start": [3300, 0],    "end": [3300, 8400],   "thickness": 120, "type": "partition" },
+    { "id": "P2",  "start": [7500, 0],    "end": [7500, 4500],   "thickness": 120, "type": "partition" },
+    { "id": "P3",  "start": [3300, 4500], "end": [11100, 4500],  "thickness": 120, "type": "partition" }
+  ],
+
+  "openings": [
+    { "wall": "WL", "offset": 4200, "width": 1500, "kind": "window", "label": "C1515", "height": 1500 },
+    { "wall": "WT", "offset": 7200, "width": 1800, "kind": "window", "label": "C1818", "height": 1800 },
+    { "wall": "WR", "offset": 2280, "width": 1200, "kind": "window", "label": "C1212", "height": 1200 },
+    { "wall": "WB", "offset": 5400, "width": 1000, "kind": "door", "swing": "left",  "label": "M1021", "height": 2100 },
+    { "wall": "P1", "offset": 6200, "width": 900,  "kind": "door", "swing": "right", "label": "M0921", "height": 2100 },
+    { "wall": "P2", "offset": 2400, "width": 900,  "kind": "door", "swing": "left",  "label": "M0921", "height": 2100 },
+    { "wall": "P3", "offset": 1800, "width": 1200, "kind": "opening", "label": "洞口" },
+    { "wall": "P3", "offset": 5400, "width": 1200, "kind": "opening", "label": "洞口" }
+  ],
+
+  "columns": [
+    { "at": [0, 0],     "width": 400, "depth": 400 },
+    { "at": [11100, 0], "width": 400, "depth": 400 },
+    { "at": [0, 8400],  "width": 400, "depth": 400 },
+    { "at": [11100, 8400], "width": 400, "depth": 400 }
+  ],
+
+  "sections": [
+    { "at": [600, 4200],  "direction": "up", "label": "1" },
+    { "at": [10500, 4200], "direction": "up", "label": "1" }
+  ],
+
+  "site": {
+    "apron": { "width": 800, "gap": 30 },
+    "steps": [
+      { "at": [5400, -120], "width": 1200, "depth": 300, "n": 2, "direction": "down" }
+    ]
+  },
+
+  "rooms": [
+    { "name": "次卧", "boundary": [[120, 120], [3240, 120], [3240, 8280], [120, 8280]],   "floor": "wood_floor" },
+    { "name": "餐厅", "boundary": [[3360, 120], [7440, 120], [7440, 4440], [3360, 4440]], "floor": "stone_tile" },
+    { "name": "厨房", "boundary": [[7560, 120], [10980, 120], [10980, 4440], [7560, 4440]], "floor": "stone_tile" },
+    { "name": "客厅", "boundary": [[3360, 4560], [10980, 4560], [10980, 8280], [3360, 8280]], "floor": "wood_floor" }
+  ],
+
+  "dimensions": {
+    "auto": true,
+    "side": "all"
+  },
+
+  "elevations": [
+    { "at": [900, 900],    "value": 0.0 },
+    { "at": [4200, 900],   "value": -0.02 },
+    { "at": [8400, 900],   "value": -0.02 },
+    { "at": [4200, 7200],  "value": 0.0 },
+    { "at": [5200, -500],  "value": -0.15, "type": "outdoor" }
+  ],
+
+  "furniture": [
+    { "block": "双人床", "at": [1700, 6200], "width": 1800, "depth": 2000 },
+    { "block": "沙发",   "at": [9000, 6600], "width": 2200, "depth": 900  },
+    { "block": "餐桌",   "at": [5400, 2400], "width": 1600, "depth": 900  },
+    { "block": "灶台",   "at": [8000, 1200], "width": 1800, "depth": 600  },
+    { "block": "洗手盆", "at": [10200, 1200], "width": 800, "depth": 550 },
+    { "block": "冰箱",   "at": [10800, 3000], "width": 700, "depth": 700  }
+  ],
+
+  "texts": [],
+
+  "titleblock": { "enabled": true }
+}
