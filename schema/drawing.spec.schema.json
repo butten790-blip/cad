@@ -1,0 +1,282 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workbuddy.local/skills/cad-construction-drawing/drawing.spec.schema.json",
+  "title": "CAD 施工图图纸规格 (drawing.spec)",
+  "description": "模型与确定性引擎之间唯一的接口契约。模型只允许产出本规格，禁止直接书写 DXF 实体或几何坐标以外的自由文本。所有长度单位默认毫米(mm)，标高单位为米(m)。",
+  "type": "object",
+  "required": ["meta", "sheet"],
+  "additionalProperties": false,
+
+  "properties": {
+    "drawing_kind": {
+      "type": "string",
+      "enum": ["plan", "floor_finish", "ceiling"],
+      "default": "plan",
+      "description": "图别。plan=平面布置图（默认，按制图惯例**不画**地面材质填充）；floor_finish=地面铺装图（画地面材质填充）；ceiling=天花布置图。地面材质属于铺装图，放在平面布置图里会压住房间名与标高。"
+    },
+
+    "meta": {
+      "type": "object",
+      "description": "图签信息，用于生成标题栏。",
+      "required": ["project", "drawing_name", "scale"],
+      "additionalProperties": false,
+      "properties": {
+        "project":      { "type": "string", "description": "工程名称" },
+        "drawing_name": { "type": "string", "description": "图名，如「一层平面布置图」" },
+        "drawing_no":   { "type": "string", "description": "图号，如「IN-01」" },
+        "scale":        { "type": "string", "enum": ["1:1","1:2","1:5","1:10","1:20","1:30","1:50","1:100","1:150","1:200","1:500","1:1000"], "description": "出图比例，取自 GB/T 50104 常用比例" },
+        "designer":     { "type": "string", "description": "设计人" },
+        "checker":      { "type": "string", "description": "审核人" },
+        "design_stage": { "type": "string", "description": "设计阶段，如「施工图」「方案」「初设」，写入标题栏" },
+        "date":         { "type": "string", "description": "出图日期，如 2026-10-15" },
+        "revision":     { "type": "string", "description": "版本号，如 A" },
+        "notes":        { "type": "array", "items": { "type": "string" }, "description": "设计说明要点，写入图面说明区" }
+      }
+    },
+
+    "sheet": {
+      "type": "object",
+      "description": "图幅与线宽组。",
+      "required": ["size"],
+      "additionalProperties": false,
+      "properties": {
+        "size": { "type": "string", "enum": ["A0","A1","A2","A3","A4"], "description": "图幅代号" },
+        "orientation": { "type": "string", "enum": ["landscape","portrait"], "default": "landscape" },
+        "lineweight_b": {
+          "type": "number",
+          "enum": [1.4, 1.0, 0.7, 0.5],
+          "default": 0.5,
+          "description": "基本线宽 b(mm)。室内设计默认 0.5。其余线宽由 0.7b/0.5b/0.25b 自动推导。"
+        }
+      }
+    },
+
+    "origin": {
+      "type": "array",
+      "items": { "type": "number" },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "可选。建筑坐标原点 (0,0) 在图纸上的落点，单位为**图纸毫米(paper mm)**，从图框内边左下角起算。省略时引擎会把建筑外包框自动居中放入图框（推荐）。仅在需要精确对位时才填写。"
+    },
+
+    "grid": {
+      "type": "object",
+      "description": "轴网。轴线用细点划线，轴号圆圈直径 8mm。纵向轴号自动跳过 I/O/Z。",
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "type": "array",
+          "description": "横向（数字编号，从左到右）轴线的 X 坐标列表(mm)，须严格递增。",
+          "items": { "type": "number" }
+        },
+        "y": {
+          "type": "array",
+          "description": "纵向（字母编号，从下到上）轴线的 Y 坐标列表(mm)，须严格递增。",
+          "items": { "type": "number" }
+        },
+        "x_labels": { "type": "array", "items": { "type": "string" }, "description": "可选：覆盖横向轴号文字" },
+        "y_labels": { "type": "array", "items": { "type": "string" }, "description": "可选：覆盖纵向轴号文字。禁止使用 I / O / Z" },
+        "extend": { "type": "number", "default": 34, "minimum": 34, "description": "轴线超出最外轮廓的延伸量，单位为**图纸毫米**。默认 34（= 最外侧尺寸链 24mm + 10mm 净距）。小于 34 会被引擎自动提升，否则轴号圆圈会与总尺寸链的起止符号相撞。" },
+        "bubble_radius": { "type": "number", "default": 4.0, "description": "轴号圆圈半径(mm)，国标直径 8mm" }
+      }
+    },
+
+    "walls": {
+      "type": "array",
+      "description": "墙体。type=structural 走 WALL-STR 图层(0.5b)，type=partition 走 WALL-PAR 图层(0.25b)。",
+      "items": {
+        "type": "object",
+        "required": ["start", "end", "thickness"],
+        "additionalProperties": false,
+        "properties": {
+          "start": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2, "description": "起点 [x, y]，沿墙中心线，mm" },
+          "end":   { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2, "description": "终点 [x, y]，沿墙中心线，mm" },
+          "thickness": { "type": "number", "exclusiveMinimum": 0, "description": "墙厚(mm)，常见 200 / 240 / 120" },
+          "type": { "type": "string", "enum": ["structural", "partition"], "default": "partition" },
+          "id": { "type": "string", "description": "可选标识，供 openings 引用" }
+        }
+      }
+    },
+
+    "openings": {
+      "type": "array",
+      "description": "门窗洞口。从所属墙段的起点沿中心线量取 offset。引擎自动打断墙体并绘制门窗图例。",
+      "items": {
+        "type": "object",
+        "required": ["wall", "offset", "width", "kind"],
+        "additionalProperties": false,
+        "properties": {
+          "wall": { "type": "integer", "minimum": 0, "description": "walls 数组下标；若墙有 id，也接受字符串 id" },
+          "offset": { "type": "number", "minimum": 0, "description": "洞口中心距墙段起点的距离(mm)" },
+          "width": { "type": "number", "exclusiveMinimum": 0, "description": "洞口宽度(mm)。常见门 800/900/1000，窗 1200/1500" },
+          "kind": { "type": "string", "enum": ["door", "window", "opening"], "description": "门 / 窗 / 无门扇洞口" },
+          "swing": { "type": "string", "enum": ["left","right","double","sliding","none"], "default": "left", "description": "开启方向，仅 door 有效" },
+          "label": { "type": "string", "description": "可选：M0921 / C1512 之类编号，写入门窗表" },
+          "height": { "type": "number", "exclusiveMinimum": 0, "description": "洞口高度(mm)。用于门窗表尺寸列；缺省时尺寸列以「宽×-」表示" }
+        }
+      }
+    },
+
+    "rooms": {
+      "type": "array",
+      "description": "房间。用于填充地面材质、标注房间名与面积。",
+      "items": {
+        "type": "object",
+        "required": ["name", "boundary"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "description": "房间名称，如「主卧室」" },
+          "boundary": {
+            "type": "array",
+            "minItems": 3,
+            "description": "闭合多边形顶点 [[x,y], ...]（mm，顺时针或逆时针）。引擎自动闭合。",
+            "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 }
+          },
+          "floor": { "type": "string", "enum": ["brick","concrete","stone_tile","wood_floor","glass","waterproof","insulation"], "description": "地面材质，决定 HATCH 图案" },
+          "show_area": { "type": "boolean", "default": true, "description": "是否标注面积(m²)" },
+          "label_at": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2, "description": "可选：房间名标注位置，默认取多边形质心" }
+        }
+      }
+    },
+
+    "dimensions": {
+      "type": "object",
+      "description": "尺寸标注链。不填则引擎按轴网自动生成三道尺寸（细部/轴线/总尺寸）。",
+      "additionalProperties": false,
+      "properties": {
+        "auto": { "type": "boolean", "default": true, "description": "是否按轴网自动生成三道尺寸线" },
+        "side": { "type": "string", "enum": ["bottom","top","left","right","all"], "default": "bottom_left", "description": "尺寸线布置边" },
+        "interior_openings": { "type": "boolean", "default": true, "description": "内墙洞口局部尺寸链（贴墙布置）" },
+        "wall_thickness": { "type": "boolean", "default": true, "description": "内部「墙厚+净宽」尺寸链" },
+        "explicit": {
+          "type": "array",
+          "description": "手动指定的尺寸链。与 auto 可并存。",
+          "items": {
+            "type": "object",
+            "required": ["axis", "at", "segments"],
+            "additionalProperties": false,
+            "properties": {
+              "axis": { "type": "string", "enum": ["horizontal","vertical","aligned"], "description": "尺寸链方向" },
+              "at": { "type": "number", "description": "尺寸线所在位置（horizontal 时为 y 坐标；vertical 时为 x 坐标），mm" },
+              "segments": {
+                "type": "array",
+                "description": "尺寸段。每段给出两个端点即可；引擎负责 45° 斜短线起止符号与文字避让。",
+                "items": {
+                  "type": "object",
+                  "required": ["from", "to"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "from": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+                    "to":   { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+                    "text": { "type": "string", "description": "可选：覆盖自动量取的尺寸数字" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "elevations": {
+      "type": "array",
+      "description": "标高符号。等腰直角三角形、直角朝下、高 3mm，数值单位米。type=outdoor 时用涂黑三角形（室外地坪标高）。",
+      "items": {
+        "type": "object",
+        "required": ["at", "value"],
+        "additionalProperties": false,
+        "properties": {
+          "at": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2, "description": "符号直角顶点位置 [x, y]，mm" },
+          "value": { "type": "number", "description": "标高值（米）。±0.000 / 3.000 / -0.450" },
+          "type": { "type": "string", "enum": ["indoor", "outdoor"], "default": "indoor", "description": "indoor=室内楼地面（空心三角）；outdoor=室外地坪（涂黑三角）" }
+        }
+      }
+    },
+
+    "columns": {
+      "type": "array",
+      "description": "结构柱。平面图应表示剖切到的柱（GB/T 50104）：矩形轮廓 + 材料填充（混凝土涂黑）。",
+      "items": {
+        "type": "object",
+        "required": ["at"],
+        "additionalProperties": false,
+        "properties": {
+          "at": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2, "description": "柱心 [x, y]，mm" },
+          "width": { "type": "number", "exclusiveMinimum": 0, "default": 400, "description": "柱宽（X 向），mm" },
+          "depth": { "type": "number", "exclusiveMinimum": 0, "description": "柱深（Y 向），mm，缺省等于 width" },
+          "rotation": { "type": "number", "default": 0, "description": "绕柱心转角（度）" },
+          "filled": { "type": "boolean", "default": true, "description": "是否涂黑（混凝土柱）" },
+          "label": { "type": "string", "description": "可选编号，如 KZ1" }
+        }
+      }
+    },
+
+    "sections": {
+      "type": "array",
+      "description": "剖切符号（GB/T 50001 第7.1节）。一个完整剖面需两个符号（剖切线两端各一，编号相同）。",
+      "items": {
+        "type": "object",
+        "required": ["at", "direction"],
+        "additionalProperties": false,
+        "properties": {
+          "at": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2, "description": "符号位置 [x, y]，mm" },
+          "direction": { "type": "string", "enum": ["down","up","left","right"], "description": "剖视方向（方向线指向的一侧）" },
+          "label": { "type": "string", "description": "剖面编号（阿拉伯数字），缺省按出现顺序" }
+        }
+      }
+    },
+
+    "window_door_schedule": {
+      "type": "boolean",
+      "default": true,
+      "description": "是否自动生成门窗统计表（编号/洞口尺寸/数量/备注）。"
+    },
+
+    "furniture": {
+      "type": "array",
+      "description": "家具/洁具/陈设图块，插入到 FURN 图层(0.18b)。优先从 assets/blocks 图库取块。",
+      "items": {
+        "type": "object",
+        "required": ["block", "at"],
+        "additionalProperties": false,
+        "properties": {
+          "block": { "type": "string", "description": "图块名。先在 assets/blocks/index.json 中查找，找不到再内联绘制简化图形。" },
+          "at": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2, "description": "插入点 [x, y]，mm" },
+          "width": { "type": "number", "description": "可选：外包宽度(mm)。图库缺块时用于内联绘制矩形占位。参考：床 1800×2000、沙发 2200×900、餐桌 1600×900、茶几 1200×600" },
+          "depth": { "type": "number", "description": "可选：外包进深(mm)" },
+          "rotation": { "type": "number", "default": 0, "description": "旋转角度(度)，逆时针为正" }
+        }
+      }
+    },
+
+    "texts": {
+      "type": "array",
+      "description": "自由文字说明，写入 TEXT 图层(0.13b)。字高必须取自 [3.5, 5, 7, 10, 14, 20]。",
+      "items": {
+        "type": "object",
+        "required": ["at", "content"],
+        "additionalProperties": false,
+        "properties": {
+          "at": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+          "content": { "type": "string" },
+          "height": { "type": "number", "enum": [3.5, 5, 7, 10, 14, 20], "default": 5, "description": "字高(mm)。图名 7/10，说明 5，尺寸数字 3.5" },
+          "rotation": { "type": "number", "default": 0 }
+        }
+      }
+    },
+
+    "titleblock": {
+      "type": "object",
+      "description": "标题栏（右下角）与会签栏（左上角）。字段留空则不绘制该项，但校验会报 WARN。",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "fields": {
+          "type": "object",
+          "description": "覆盖 meta 中的图签字段，用于一张图上多个标题栏的场景。",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    }
+  }
+}
